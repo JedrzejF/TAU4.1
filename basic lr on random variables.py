@@ -105,13 +105,7 @@ def predict(data):
     return(target)
 
 test = pd.read_csv('test-A/in.tsv', sep = '\t')
-with open('test-A/out.tsv', 'w') as save:
-    results = predict(test)
-    for i in range(len(results)):
-        save.write(str(results[i]) + "\n")
+pd.DataFrame(predict(test)).to_csv('test-A/out.tsv', index=None, header=None, sep='\t')
         
 dev = pd.read_csv('dev-0/in.tsv', sep = '\t')
-with open('dev-0/out.tsv', 'w') as save:
-    results = predict(dev)
-    for i in range(len(results)):
-        save.write(str(results[i]) + "\n")
+pd.DataFrame(predict(dev)).to_csv('dev-0/out.tsv', index=None, header=None, sep='\t')
