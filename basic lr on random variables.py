@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import torch
- 
+
 df = pd.read_csv('train/train.tsv', sep = '\t')
 colnames = df.columns
 
@@ -15,7 +15,7 @@ e = empty['cena'].mean()
 variable1 = df['Rok budowy']
 variable3 = df['Typ zabudowy']
 
-for i in range(len(variable1):
+for i in range(len(variable1)):
         if np.isnan(variable1[i]):
             if (variable3[i] == ' apartamentowiec'):
                 variable1[i] = a
@@ -38,9 +38,9 @@ d = target_variable.mean()
 inputs1 = np.array(variable1)
 inputs2 = np.array(variable2)
 targets = np.array(target_variable)
-inputs1 = torch.from_numpy(inputs1)
-inputs2 = torch.from_numpy(inputs2)
-targets = torch.from_numpy(targets)
+inputs1 = torch.from_numpy(inputs1).float()
+inputs2 = torch.from_numpy(inputs2).float()
+targets = torch.from_numpy(targets).float()
 print(inputs1)
 print(inputs2)
 print(targets)
@@ -73,7 +73,7 @@ for i in range(130):
         weight1.grad.zero_()
         weight2.grad.zero_()
         bias.grad.zero_()
-        
+
 preds = lr(inputs1, inputs2)
 loss = mse(preds, targets)
 print(loss)
@@ -81,9 +81,10 @@ print(preds)
 print(targets)
 
 def predict(data):
-    variable1 = data['Rok budowy']
-    variable2 = data['opis'].str.len()
-    variable3 = data['Typ zabudowy']
+    variable1 = data[data.columns[8]]
+    print(len(variable1))
+    variable2 = data[data.columns[17]].str.len()
+    variable3 = data[data.columns[5]]
     target = []
 
     for i in range(len(variable1)):
@@ -91,21 +92,21 @@ def predict(data):
                 if (variable3[i] == ' apartamentowiec'):
                     variable1[i] = a
                     target.append(variable1[i] * weight1.item() + variable2[i] * weight2.item() + bias.item())
-                if (variable3[i] == ' kamienica'):
+                elif (variable3[i] == ' kamienica'):
                     variable1[i] = b
                     target.append(variable1[i] * weight1.item() + variable2[i] * weight2.item() + bias.item())
                 else:
                     target.append(d)
             elif np.isnan(variable1[i]) and np.isnan(variable2[i]):
-                target.append(e*d/2)
+                target.append(e+d/2)
             elif np.isnan(variable2[i]) and not np.isnan(variable1[i]):
                 target.append(e)
             else:
                 target.append(variable1[i] * weight1.item() + variable2[i] * weight2.item() + bias.item())
     return(target)
 
-test = pd.read_csv('test-A/in.tsv', sep = '\t')
+test = pd.read_csv('test-A/in.tsv', sep = '\t', header=None)
 pd.DataFrame(predict(test)).to_csv('test-A/out.tsv', index=None, header=None, sep='\t')
-        
+
 dev = pd.read_csv('dev-0/in.tsv', sep = '\t')
 pd.DataFrame(predict(dev)).to_csv('dev-0/out.tsv', index=None, header=None, sep='\t')
